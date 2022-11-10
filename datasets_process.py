@@ -45,13 +45,13 @@ def cycleProcess(cycleNumber):
         count = 0
         errors_list_position = []
         for vcg_lead in range(vcg.signal.shape[1]):
-            os.makedirs(f'/home/gpds/Documentos/ptb_vcg/dissertacao-main/Results/{currentSignalName}', exist_ok = True)
+            os.makedirs(f'/home/gpds/Documentos/ptb_vcg/dissertacao-main/Results_alt2/{dataset}/{currentSignalName}/{cycleNumber}', exist_ok = True)
         for tau in [1,2]:
             vcgLeadsOfCycleRPS = np.zeros(
             (signalOfCycle.shape[0] - n_samples_to_delay*tau, 2))
             for vcg_lead in range(vcg.signal.shape[1]):
                 vcgLeadsOfCycleRPS[:, :] = SignalProcess.reconstructPhaseSpace(signalOfCycle[:, vcg_lead], n_samples_to_delay*tau)
-                Display(vcgLeadsOfCycleRPS, FIGSIZE, PLOT_LIMS).save_RPS_image(f'/home/gpds/Documentos/ptb_vcg/dissertacao-main/Results/{currentSignalName}/RPS_{variables[vcg_lead]}_tau00{tau}s.png', 'off')
+                Display(vcgLeadsOfCycleRPS, FIGSIZE, PLOT_LIMS).save_RPS_image(f'/home/gpds/Documentos/ptb_vcg/dissertacao-main/Results_alt2/{dataset}/{currentSignalName}/{cycleNumber}/RPS_{variables[vcg_lead]}_tau00{tau}s.png', 'off')
                 count+=1
     except:
         errors_list_position.append(count)
