@@ -110,4 +110,4 @@ for dataset in datasets:
     # break
 print(f'\n\nElapsed time: {(time.time() - start)} seconds')
 
-print(f'\nDos {count_signals} sinais, {count_bad_signals} eram menor que 450, e {count_error} sinais com erro de execução')
+print(f'\nDos {count} sinais, {count_bad_signals} eram menor que 450, e {count_error} sinais com erro de execução')
