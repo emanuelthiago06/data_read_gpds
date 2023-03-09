@@ -179,6 +179,7 @@ class Rede:
             self.run_model()
             acc_list.append(self.__last_acc)
             sen_list.append(self.__last_sen)
+            self.__clean_df_all =[]
         self.__last_acc = sum(acc_list)/(len(acc_list))
         self.__last_sen = sum(sen_list)/(len(sen_list))
         if save_results:
