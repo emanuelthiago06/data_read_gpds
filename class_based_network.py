@@ -1,6 +1,6 @@
 from django import db
 from libimports import *
-from func import *
+
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -29,6 +29,8 @@ class Rede:
         self.__global_df = []
         self.__class_n = [1,0]
         self.__clean_df_all = []
+        self.__max_trials = 10
+        self.__executions_per_trial = 10
     def __load_csv(self,path):
         try:
             db = pd.read_csv(path)
@@ -36,6 +38,7 @@ class Rede:
         except:
             raise SystemError(f"Erro na hora de carregar os arquivos, cheque se o caminho está correto ou se os arquivos tem a extensão csv: {path} ")
     def change_files(self, bolean: bool = True) -> None:
+        """Não use esse método a não ser que você tenha lido a documentação e saiba oque ele faz"""
         self.__files_status = bolean
 
     def __define_global_df_and_drop(self) -> None:
@@ -73,13 +76,79 @@ class Rede:
 
             self.__clean_df_all.append(clean_df)
 
+    def __split_val_test_train(self) -> None:
+        self.__x_train, self.__y_train, self.__x_test, self.__y_test, self.__x_val, self.__y_val = split_pipeline(self.__clean_df_all, split_size = 0.15, categories_qtd = 2)
+        self.__y_train = self.__y_train[:,0]
+        self.__y_val = self.__y_val[:,0]
+        self.__y_test = self.__y_test[:,0]
+
+    def __model_execution(self) -> None:
+        build_model(keras_tuner.HyperParameters(),self.__x_train.shape[1])
+        tuner = keras_tuner.BayesianOptimization(
+            hypermodel=build_model,
+            objective="val_accuracy",
+            max_trials=self.__max_trials,
+            executions_per_trial=self.__executions_per_trial,
+            overwrite=True,
+            directory="my_dir",
+            project_name="helloworld",
+            )
+        tuner.search(self.__x_train, self.__y_train, epochs=10, validation_data=(self.__x_val, self.__y_val))
+        models = tuner.get_best_models(num_models=2)
+        best_model = models[0]
+        best_model.build(input_shape=(self.__x_train.shape[1],))
+        best_model.summary()
+        print("passou")
+        tuner.results_summary(num_trials = 10)
+
     def set_drop(self,drop_list: list = [""]) -> None:
+        """ Define as colunas que irão ser dropadas para fazer o dataframe útil """
         self.__drop_names = drop_list
     
-    def show_df(self):
+    def set_val_path(self, path : str) -> None:
+        """ Define o caminho do dataset da validação """
+        self.__val_path = path
+
+    def set_train_path(self, path : str) -> None:
+        """ Define o caminho do dataset do treino """
+        self.__train_path = path
+
+    def set_test_path(self, path : str) -> None:
+        """ Define o caminho do dataset do teste """
+        self.__test_path = path
+
+    def set_max_trials(self, number : int) -> None:
+        """ Define o valor do max_trials do keras tuner que define a quantidade de vezes
+        que o keras tenta achar os melhores valores """
+        if not isinstance(number,int):
+            raise SystemError("max-trials deve ser um numero inteiro")
+        self.__max_trials = number
+
+    def set_executions_per_trials(self, number : int) -> None:
+        """ Define o valor do executions_per_trial do keras tuner, que define a quantidade de vezes
+        que o keras vai rodar dentro de uma tentativa para achar os melhores parâmetros """
+        if not isinstance(number,int):
+            raise SystemError("executions-per-trial deve ser um numero inteiro")
+        self.__executions_per_trial = number
+
+    def set_class_elements(self, elements_list : list) -> None:
+        """ Define os elementos dentro da sua classe é usado para filtrar, é necessário mandar
+        uma lista que contém os elementos da sua classe ex: [1,0]"""
+        self.__class_n = elements_list
+
+    def run_model(self) -> None:
+         self.__create_clean_df()
+         self.__split_val_test_train()
+         self.__model_execution()
+
+    def show_df(self) -> None:
         self.__create_clean_df()
         self.__clean_df_all[1].head(10)
 
         
-
+if __name__ == "__main__":
+    rede = Rede()
+    rede.change_files()
+    rede.show_df()
+    rede.run_model()
 
