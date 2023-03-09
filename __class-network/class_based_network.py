@@ -168,6 +168,11 @@ class Rede:
          self.__execute_model()
     
     def run_model_n_times(self, number: int, save_results: bool = False, file_name: str = "teste.txt") -> None:
+        """ Método feito para rodar o modelo mais de uma vez, o número de vezes desejado deve ser colocado
+        na variável number, ou no primeiro argumento da função, save_results vai salvar os resultados se
+        você mandar um True em save_results ou na segunda posição da função, por fim file_name vai ser
+        o nome do arquivo que será salvo, o padrão é teste.txt, mude o argumento file_name ou então o ter
+        ceiro argumento da função """
         acc_list = []
         sen_list = []
         for i in range(number):
