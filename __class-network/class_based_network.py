@@ -5,6 +5,8 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 SPLITS = ["train,val,test"]
+INPUT_SIZE = 1
+
 
 class Rede:
     def __init__(self, **kwargs):
@@ -33,7 +35,7 @@ class Rede:
         self.__executions_per_trial = 10
         self.__epochs_search = 5
         self.__epochs = 5
-
+        self.__keras_dir = "my_dir3"
     def __load_csv(self,path):
         try:
             db = pd.read_csv(path)
@@ -93,7 +95,7 @@ class Rede:
             max_trials=self.__max_trials,
             executions_per_trial=self.__executions_per_trial,
             overwrite=True,
-            directory="my_dir",
+            directory=self.__keras_dir,
             project_name="helloworld",
             )
         tuner.search(self.__x_train, self.__y_train, epochs=self.__epochs_search, validation_data=(self.__x_val, self.__y_val))
@@ -167,6 +169,11 @@ class Rede:
          self.__split_val_test_train()
          self.__execute_model()
     
+    def __save_results(self,file_name) -> None:
+        f = open(file_name,"a+")
+        f.write(f"{self.__last_acc}                 {self.__last_sen}\n")
+        f.close()
+
     def run_model_n_times(self, number: int, save_results: bool = False, file_name: str = "teste.txt") -> None:
         """ Método feito para rodar o modelo mais de uma vez, o número de vezes desejado deve ser colocado
         na variável number, ou no primeiro argumento da função, save_results vai salvar os resultados se
@@ -175,18 +182,22 @@ class Rede:
         ceiro argumento da função """
         acc_list = []
         sen_list = []
+        if save_results:
+            f = open(file_name,"a+")
+            f.write("Accuracy:                      Sensibilitie:\n")
+            f.close()
         for i in range(number):
+            print(f"começando a rodada de teste numero {i}")
             self.run_model()
+            if save_results:
+                self.__save_results(file_name=file_name)
             acc_list.append(self.__last_acc)
             sen_list.append(self.__last_sen)
             self.__clean_df_all =[]
         self.__last_acc = sum(acc_list)/(len(acc_list))
         self.__last_sen = sum(sen_list)/(len(sen_list))
         if save_results:
-            f = open(file_name,"w+")
-            f.write("Accuracy:                      Sensibilitie:\n")
-            for i in range(len(acc_list)):
-                f.write(f"{acc_list[i]}                 {sen_list[i]}\n")
+            f = open(file_name,"a+")
             f.write(f"\n\nValores médios: Acc = {self.__last_acc}        Sen = {self.__last_sen}")
             f.close()
             
@@ -202,8 +213,14 @@ class Rede:
     def show_df(self) -> None:
         self.__create_clean_df()
         self.__clean_df_all[1].head(10)
-    
 
+    def set_dir(self,name = "mydir"):
+        self.__keras_dir = name
+
+    def set_input_size(self, number: int):
+        self.__input_size = number
+        INPUT_SIZE = number
+    
         
 if __name__ == "__main__":
     rede = Rede()

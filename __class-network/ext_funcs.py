@@ -1,5 +1,9 @@
 from libimports import *
 
+INPUT_SIZE = 15
+
+def iniciate_input_size(number):
+    INPUT_SIZE = number
 
 def split_pipeline(dataframe, split_size = 0.3, categories_qtd = 2, normalize = True, TARGET = 'classe'):
     
@@ -25,7 +29,7 @@ def split_pipeline(dataframe, split_size = 0.3, categories_qtd = 2, normalize = 
 
     return train_df, train_labels, test_df, test_labels, val_df, val_labels
 
-def make_model(units, activation, dropout, lr, input_size = 17):
+def make_model(units, activation, dropout, lr, input_size = INPUT_SIZE):
     METRICS = [
       keras.metrics.SensitivityAtSpecificity(name='Sen', specificity= 0.5),
       keras.metrics.SpecificityAtSensitivity(name='Spe', sensitivity = 0.5),
@@ -46,7 +50,7 @@ def make_model(units, activation, dropout, lr, input_size = 17):
     )
     return model
 
-def build_model(hp, input_size = 17):
+def build_model(hp, input_size = INPUT_SIZE):
     units = hp.Int("units", min_value=32, max_value=512, step=32)
     activation = hp.Choice("activation", ["relu", "tanh"])
     dropout = hp.Boolean("dropout")
