@@ -36,6 +36,7 @@ class Rede:
         self.__epochs_search = 5
         self.__epochs = 5
         self.__keras_dir = "my_dir3"
+        self.__run_alt = False if "run_alt" not in kwargs else kwargs["run_alt"]
     def __load_csv(self,path):
         try:
             db = pd.read_csv(path)
@@ -105,7 +106,8 @@ class Rede:
 
 
     def __execute_model(self):
-        self.__calc_hiperparameters()
+        if not self.__run_alt:
+            self.__calc_hiperparameters()
         self.__best_model.build(input_shape=(self.__x_train.shape[1],))
         BATCH_SIZE = None
         history = self.__best_model.fit(
@@ -122,6 +124,7 @@ class Rede:
         self.__last_acc = history.history["val_accuracy"][-1]
         self.__last_sen = history.history["val_Sen"][-1]
         self.__best_model.summary()
+
 
     def set_drop(self,drop_list: list = [""]) -> None:
         """ Define as colunas que irão ser dropadas para fazer o dataframe útil """
@@ -168,6 +171,12 @@ class Rede:
          self.__create_clean_df()
          self.__split_val_test_train()
          self.__execute_model()
+        
+    def run_hiperparameters(self) -> None:
+        self.__create_clean_df()
+        self.__split_val_test_train()
+        self.__calc_hiperparameters()
+        
     
     def __save_results(self,file_name) -> None:
         f = open(file_name,"a+")
@@ -180,6 +189,8 @@ class Rede:
         você mandar um True em save_results ou na segunda posição da função, por fim file_name vai ser
         o nome do arquivo que será salvo, o padrão é teste.txt, mude o argumento file_name ou então o ter
         ceiro argumento da função """
+        if self.__run_alt:
+            self.run_hiperparameters()
         acc_list = []
         sen_list = []
         if save_results:
@@ -188,7 +199,10 @@ class Rede:
             f.close()
         for i in range(number):
             print(f"começando a rodada de teste numero {i}")
-            self.run_model()
+            if self.__run_alt:
+                self.__execute_model()
+            else:
+                self.run_model()
             if save_results:
                 self.__save_results(file_name=file_name)
             acc_list.append(self.__last_acc)
@@ -200,6 +214,8 @@ class Rede:
             f = open(file_name,"a+")
             f.write(f"\n\nValores médios: Acc = {self.__last_acc}        Sen = {self.__last_sen}")
             f.close()
+
+    
             
 
 
@@ -220,6 +236,11 @@ class Rede:
     def set_input_size(self, number: int):
         self.__input_size = number
         INPUT_SIZE = number
+
+    def set_run_alt(self,run_alt : bool = True):
+        """Novo método, nele é possível ao inves de rodar o keras turner e depois o modelo várias vezes
+        se for passado True para essa função ele rodará o keras turner apenas uma vez e o modelo várias"""
+        self.__run_alt = run_alt
     
         
 if __name__ == "__main__":
