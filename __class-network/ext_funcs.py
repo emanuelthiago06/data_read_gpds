@@ -1,6 +1,6 @@
 from libimports import *
 
-INPUT_SIZE = 15
+INPUT_SIZE = 16
 
 def iniciate_input_size(number):
     INPUT_SIZE = number
@@ -46,7 +46,10 @@ def make_model(units, activation, dropout, lr, input_size = INPUT_SIZE):
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=lr),
         loss="binary_crossentropy",
-        metrics=["accuracy",keras.metrics.SensitivityAtSpecificity(name='Sen', specificity= 0.5)],
+        metrics=["accuracy",keras.metrics.SensitivityAtSpecificity(name='Sen', specificity= 0.5),
+                    tf.keras.metrics.Precision(name='Pres'),
+                    tf.keras.metrics.Recall(name = "recall")
+                ],
     )
     return model
 

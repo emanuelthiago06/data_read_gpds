@@ -35,7 +35,7 @@ class Rede:
         self.__executions_per_trial = 10
         self.__epochs_search = 5
         self.__epochs = 5
-        self.__keras_dir = "my_dir3"
+        self.__keras_dir = "my_dir5"
         self.__run_alt = False if "run_alt" not in kwargs else kwargs["run_alt"]
     def __load_csv(self,path):
         try:
@@ -123,6 +123,7 @@ class Rede:
         self.__best_model.evaluate(x = self.__x_val, y = self.__y_val, batch_size=None, return_dict=False)
         self.__last_acc = history.history["val_accuracy"][-1]
         self.__last_sen = history.history["val_Sen"][-1]
+        self.__summary = history.history
         self.__best_model.summary()
 
 
@@ -182,6 +183,10 @@ class Rede:
         f = open(file_name,"a+")
         f.write(f"{self.__last_acc}                 {self.__last_sen}\n")
         f.close()
+
+        second_file = open(f"summary_{file_name}","a+")
+        second_file.write(f"{self.__summary}")
+        second_file.close()
 
     def run_model_n_times(self, number: int, save_results: bool = False, file_name: str = "teste.txt") -> None:
         """ Método feito para rodar o modelo mais de uma vez, o número de vezes desejado deve ser colocado
