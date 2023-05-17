@@ -124,6 +124,8 @@ class Rede:
         self.__last_acc = history.history["val_accuracy"][-1]
         self.__last_sen = history.history["val_Sen"][-1]
         self.__summary = history.history
+        self.__last_prec = history.history["val_Pres"][-1]
+        self.__last_f1 = 2*(self.__last_prec*self.__last_sen)/(self.__last_prec+self.__last_sen)
         self.__best_model.summary()
 
 
@@ -181,12 +183,8 @@ class Rede:
     
     def __save_results(self,file_name) -> None:
         f = open(file_name,"a+")
-        f.write(f"{self.__last_acc}                 {self.__last_sen}\n")
+        f.write(f"{self.__last_acc}                 {self.__last_sen}                 {self.__last_prec}                 {self.__last_f1}\n")
         f.close()
-
-        second_file = open(f"summary_{file_name}","a+")
-        second_file.write(f"{self.__summary}")
-        second_file.close()
 
     def run_model_n_times(self, number: int, save_results: bool = False, file_name: str = "teste.txt") -> None:
         """ Método feito para rodar o modelo mais de uma vez, o número de vezes desejado deve ser colocado
@@ -198,9 +196,12 @@ class Rede:
             self.run_hiperparameters()
         acc_list = []
         sen_list = []
+        sen_list = []
+        f1_list = []
+        prec_list = []
         if save_results:
             f = open(file_name,"a+")
-            f.write("Accuracy:                      Sensibilitie:\n")
+            f.write("Accuracy:                      Sensibilitie:                   Precision:                   F1-score:\n")
             f.close()
         for i in range(number):
             print(f"começando a rodada de teste numero {i}")
@@ -212,12 +213,16 @@ class Rede:
                 self.__save_results(file_name=file_name)
             acc_list.append(self.__last_acc)
             sen_list.append(self.__last_sen)
+            prec_list.append(self.__last_prec)
+            f1_list.append(self.__last_f1)
             self.__clean_df_all =[]
-        self.__last_acc = sum(acc_list)/(len(acc_list))
-        self.__last_sen = sum(sen_list)/(len(sen_list))
+        self.__avg_acc = sum(acc_list)/(len(acc_list))
+        self.__avg_sen = sum(sen_list)/(len(sen_list))
+        self.__avg_prec = sum(prec_list)/(len(prec_list))
+        self.__avg_f1 = sum(f1_list)/(len(f1_list))
         if save_results:
             f = open(file_name,"a+")
-            f.write(f"\n\nValores médios: Acc = {self.__last_acc}        Sen = {self.__last_sen}")
+            f.write(f"\n\nValores médios: Acc = {self.__avg_acc}        Sen = {self.__avg_sen}       Prec = {self.__avg_prec}          F1 = {self.__avg_f1}")
             f.close()
 
     
